@@ -1,0 +1,42 @@
+
+# This playbooks will going configure Baseos and Appstream repositories all the nodes in project
+ # please do syntax check before excuting playbooks by using following command
+ ## ansible-playbook <playbook-name> --syntax-check
+ #if all is well users can see output like 
+ #Playbook: <playbook-name>
+ #execute playbooks with "ansible-playbook <playbook-name>"
+# Play 1
+---
+- name: configure baseos and appstream repositories in managed nodes
+  hosts: test_project,prod_project
+  tasks:
+    - name: configure baseos repository in managed nodes
+      yum_repository:
+        file: EX200
+        name: rh124
+        description: "baseos repository"
+        baseurl: http://192.168.50.63/Redhat-Repositories/BaseOS/
+        gpgcheck: yes
+        gpgkey: http://192.168.50.63/Redhat-Repositories/RPM-GPG-KEY-redhat-release
+        enabled: true
+ # configure appstream repository in test_project and prod_project hosts   
+    - name: configure appstream repository in mamnaged nodes
+      ansible.builtin.yum_repository:
+        file: Ex294
+        name: rh134
+        description: appstream-repo
+        baseurl: http://192.168.50.63/Redhat-Repositories/AppStream/
+        gpgcheck: true
+        gpgkey: http://192.168.50.63/Redhat-Repositories/RPM-GPG-KEY-redhat-release
+        enabled: yes 
+ 
+ # Play 2       
+  
+- name: install git package in all managed nodes
+  hosts: all
+  tasks:
+    - name: install git package
+      yum:
+        name: git
+        state: present
+...
