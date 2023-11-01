@@ -1,0 +1,55 @@
+
+# Play 1 
+# install various packages in managed nodes 
+---
+- name: install and configure httpd package in dev_project hosts
+  hosts: dev_project,test_project
+  tasks:
+    - name: install apache package 
+      ansible.builtin.yum:
+        name: httpd
+        state: present
+    - name: start apache service
+      ansible.builtin.service:
+        name: httpd
+        state: started
+        enabled: yes
+    - name: allow http service from firewall
+      ansible.posix.firewalld:
+        service: http
+        state: enabled
+        permanent: true
+        immediate: yes
+
+# Play2 remove wget and vim packages from managed nodes in dev_project
+- name: remove vim and wget packages in dev_project
+  hosts: dev_project
+  tasks:
+    - name: remove vim and wget
+      ansible.builtin.yum:
+        name: 
+          - vim
+          - wget
+        state: absent
+    - name: install httpd-tools and nginx
+      ansible.builtin.package:
+        name: "{{packages}}"
+      vars:
+        packages: 
+          - httpd-tools
+          - nginx
+        state: present
+# play3
+- name: create a file and add a content inside a file
+  hosts: prod_project
+  tasks:
+    - name: create an empty file
+      ansible.builtin.file:
+        path: /tmp/redhat.txt
+        state: touch
+        owner: ansadmin
+        mode: "700"
+    - name: add a single line content in redhat.txt
+      ansible.builtin.copy:
+        content: "Manage arbitrary ports/services with firewalld"
+        dest: /tmp/redhat.txt
