@@ -1,0 +1,11 @@
+[dev_project]
+clientnode1
+[test_project]
+clientnode2
+[prod_project]
+clientnode3
+clientnode4
+
+[webservers:children]
+dev_project
+test_project
