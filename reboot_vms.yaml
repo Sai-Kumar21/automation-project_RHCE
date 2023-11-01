@@ -1,0 +1,8 @@
+---
+- name: shutdown all managed nodes
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: shutdown vm's
+      ansible.builtin.reboot:
+        
