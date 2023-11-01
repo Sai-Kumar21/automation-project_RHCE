@@ -1,0 +1,30 @@
+---
+- name: restart httpd service in dev_project
+  hosts: dev_project
+  gather_facts: false
+  become: yes
+  tasks:
+    - name: add content in a file
+      ansible.builtin.copy:
+        content: "ex294 do288 do442"
+        dest: /var/www/html/index.html
+      tags: [never, saik]
+      notify: restart apache  
+    - name: allow port 445 in firewall
+      ansible.posix.firewalld:
+        port: 445/tcp
+        state: enabled
+        permanent: yes
+        immediate: yes
+      tags: [never, redhat]
+      notify: restart httpd
+
+  handlers:
+    - name: restart httpd
+      ansible.builtin.service:
+        name: httpd
+        state: restarted
+    - name: restart apache
+      ansible.builtin.systemd:
+        name: httpd
+        state: restarted 
