@@ -1,0 +1,71 @@
+---
+- name: hosting muti websites with single webservice
+  hosts: prod_project
+  gather_facts: false
+  become: true
+  vars:
+    web_package: httpd
+    web_service: httpd
+    fw_apache: http
+  tasks:
+    - name: install httpd package
+      ansible.builtin.yum:
+        name: "{{web_package}}"
+        state: latest
+    - name: start and enable apache service
+      ansible.builtin.systemd:
+        name: "{{web_service}}"
+        state: started
+        enabled: yes
+    - name: create a directories
+      ansible.builtin.file:
+        path: "{{item}}"
+        state: directory
+        group: apache
+        setype: httpd_sys_content_t
+      loop:
+        - /website
+        - /webhost
+    - name: create an index.html file /website
+      ansible.builtin.copy:
+        content: "Red Hat OpenShift Installation Lab"
+        dest: /website/index.html
+        setype: httpd_sys_content_t
+    - name: create an index.html file /webhost
+      ansible.builtin.copy:
+        content: "Red Hat OpenShift Installation Lab (DO322)"
+        dest: /webhost/index.html
+        setype: httpd_sys_content_t
+    - name: create a symbolic from /website to home directory of web
+      ansible.builtin.file:
+        src: /website
+        dest: /var/www/html/website
+        state: link
+        force: yes
+      tags: 
+        - linkwebsite
+      notify: restart httpd
+    - name: create a symbolic link from /webhost to home directory of web
+      ansible.builtin.file:
+        src: /webhost
+        dest: /var/www/html/webhost
+        state: link
+        force: yes
+      tags: linkwebhost
+      notify: restart httpd
+    - name: allow http service from firewall
+      ansible.posix.firewalld:
+        service: "{{fw_apache}}"
+        state: enabled
+        permanent: yes
+        immediate: yes
+      notify: restart httpd
+  handlers:
+    - name: restart httpd
+      ansible.builtin.systemd:
+        name: "{{web_service}}"
+        state: restarted
+
+
+
+
