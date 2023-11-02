@@ -1,0 +1,45 @@
+# This playbook will going to create mutiple departmental users in mutiple nodes with the condition
+# if you want to execute this play , must specific tags
+---
+- name: onboard various departmental users in managed nodes
+  hosts: all
+  gather_facts: false
+  become: true
+  vars_files:
+    - user_list.yaml
+    - secret_pass.yaml
+  tasks:
+    - name: create a groups in managed nodes
+      ansible.builtin.group:
+        name: "{{item}}"
+        state: present
+      loop:
+        - devops-team
+        - sre-team
+      tags: [never, groups]
+ # create a devops users from the list of users in dev and test project nodes
+    - name: onboard a devops users
+      ansible.builtin.user:
+        name: "{{item.name}}"
+        uid: "{{item.uid}}"
+        password: "{{devops_pass|password_hash('sha512') }}"
+        comment: "devops engineer"
+        groups: devops-team
+        state: present
+      loop: "{{users_data}}"
+      tags: [never, alpha]
+      when: (inventory_hostname in groups['dev_project'] or inventory_hostname in groups['test_project']) and item.job== "devops"
+      
+ # create a list sre users from user list file in prod project nodes
+    - name: onboard sre users
+      ansible.builtin.user:
+        name: "{{item.name}}"
+        uid: "{{item.uid}}"
+        password: "{{sre_pass|password_hash('sha512') }}"
+        comment: "site relability engineer"
+        group: sre-team
+        groups: devops-team
+      loop: "{{users_data}}"
+      tags: [never, beta]
+      when: inventory_hostname in groups['prod_project'] and item.job== "sre"
+
