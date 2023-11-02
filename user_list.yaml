@@ -1,0 +1,14 @@
+---
+users_data:
+  - name: devops1
+    uid: 1050
+    job: devops
+  - name: devops2
+    uid: 1060
+    job: devops
+  - name: sre1
+    uid: 1160
+    job: sre
+  - name: sre2
+    uid: 1170
+    job: sre
