@@ -1,3 +1,5 @@
+# Playbook to change the port number for ssh service in managed nodes
+#
 ---
 - name: change the port number for ssh protocol
   hosts: prod_project
