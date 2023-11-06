@@ -1,0 +1,29 @@
+---
+- name: change the port number for ssh protocol
+  hosts: prod_project
+  become: yes
+  gather_facts: false
+  tasks:
+    - name: change a port in sshd configuration file
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: "^Port"
+        line: "Port 222"
+    - name: add port in selinux db
+      community.general.seport:
+        ports: 222
+        proto: tcp
+        setype: ssh_port_t
+        state: present
+    - name: open port 222 from firewall
+      ansible.posix.firewalld:
+        port: 222/tcp
+        state: enabled
+        permanent: yes
+        immediate: yes
+      notify: restart sshd
+  handlers:
+    - name: restart sshd
+      ansible.builtin.service:
+        name: sshd
+        state: restarted

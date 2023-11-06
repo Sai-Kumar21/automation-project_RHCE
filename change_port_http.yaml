@@ -1,0 +1,31 @@
+---
+- name: changing port number for http protocol in prod_project nodes
+  hosts: prod_project
+  gather_facts: false
+  become: true
+  tasks:
+    - name: chage port for apache webserver
+      ansible.builtin.lineinfile:
+        path: /etc/httpd/conf/httpd.conf
+        regexp: "^888"
+        insertafter: "^888"
+        line: Listen 888
+    - name: add port 888 in selinux db
+      community.general.seport:
+        ports: 888
+        proto: tcp
+        setype: http_port_t
+        state: present
+      notify: restart apache
+    - name: open port 888 from firewall
+      ansible.posix.firewalld:
+        port: 888/tcp
+        state: enabled
+        permanent: yes
+        immediate: yes
+  handlers:
+    - name: restart apache
+      ansible.builtin.systemd:
+        name: httpd
+        state: restarted
+
