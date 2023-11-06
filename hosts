@@ -3,9 +3,13 @@ clientnode1
 [test_project]
 clientnode2
 [prod_project]
-clientnode3
-clientnode4
+clientnode3 
+clientnode4 
 
 [webservers:children]
 dev_project
 test_project
+
+[prod_project:vars]
+ansible_port=222
+ansible_user=sre1
