@@ -1,0 +1,9 @@
+---
+- name: print information from managed nodes
+  hosts: all
+  become: true
+  tasks:
+    - name: print info
+      ansible.builtin.debug:
+        msg: "{{ansible_default_ipv4.address}} {{inventory_hostname}}"
+      when: inventory_hostname in groups['dev_project']
