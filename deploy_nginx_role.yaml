@@ -1,0 +1,6 @@
+---
+- name: deploy the nginx role in managed nodes
+  hosts: all
+  become: true
+  roles:
+    - nginx_webserver
