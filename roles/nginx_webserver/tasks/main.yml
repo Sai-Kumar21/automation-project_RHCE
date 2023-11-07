@@ -1,0 +1,24 @@
+# tasks/main.yaml file will going deploy the nginx web server
+# what ever the variables we declared in tasks, users can vaerify from vars/main.yml file
+---
+- name: install nginx package in managed nodes
+  ansible.builtin.package:
+    name: "{{web_package}}"
+    state: present
+- name: start and enable nginx webserver
+  ansible.builtin.systemd:
+    name: "{{web_svc}}"
+    state: started
+    enabled: yes
+- name: allow http from firewall
+  ansible.posix.firewalld:
+    service: "{{fw_svc}}"
+    state: enabled
+    permanent: yes
+    immediate: yes
+- name: deploy the template in managed nodes
+  ansible.builtin.template:
+    src: template-nginx.j2
+    dest: /usr/share/nginx/html/index.html
+  notify: restart nginx
+
