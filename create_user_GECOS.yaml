@@ -1,0 +1,18 @@
+---
+- name: create users from the list
+  hosts: dev
+  become: true
+  vars_files:
+    - user_list.yml
+  tasks:
+    - name: create user
+      vars:
+        password: "{{lookup('password', 'filename-' + item.name + 'length=6 chars=digits')}}"
+      ansible.builtin.user:
+        name: "{{item.name}}"
+        state: present
+        uid: "{{item.uid}}"
+        password: "{{password|password_hash('sha512') }}"
+        update_password: on_create
+        comment: "{{item.first|capitalize}} {{item.middle|capitalize}} {{item.last|capitalize}}"
+      loop: "{{users}}"
